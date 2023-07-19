@@ -9,16 +9,23 @@ import SwiftUI
 import MapKit
 
 struct LocationMapView: View {
-    @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 38.573840, longitude: 68.795335), span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+    
+    @StateObject private var viewModel = LocationMapViewModel()
     
     var body: some View {
         ZStack {
-            Map(coordinateRegion: $region).ignoresSafeArea()
+            Map(coordinateRegion: $viewModel.region).ignoresSafeArea()
             
             VStack {
                 LogoView().shadow(radius: 10)
                 Spacer()
             }
+        }
+        .alert(item: $viewModel.alertItem, content: { alertItem in
+            Alert(title: alertItem.title, message: alertItem.message, dismissButton: alertItem.dismissButton)
+        })        
+        .onAppear {
+            viewModel.getLocations()
         }
     }
 }
