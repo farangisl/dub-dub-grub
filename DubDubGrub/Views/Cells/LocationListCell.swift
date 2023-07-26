@@ -13,7 +13,7 @@ struct LocationListCell: View {
     
     var body: some View {
         HStack {
-            Image("default-square-asset")
+            Image(uiImage: location.createSquareImage())
                 .resizable()
                 .scaledToFit()
                 .frame(width: 80, height: 80)
@@ -28,7 +28,7 @@ struct LocationListCell: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 HStack {
                     ForEach(1..<6) { i in
-                        AvatarView(size: 35)
+                        AvatarView(image: PlaceholderImage.avatar, size: 35)
                     }
                 }
             }
