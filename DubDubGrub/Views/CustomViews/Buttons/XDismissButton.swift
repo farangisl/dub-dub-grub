@@ -2,7 +2,7 @@
 //  XDismissButton.swift
 //  DubDubGrub
 //
-//  Created by IMacIBT1 on 20/07/23.
+//  Created by Farangis Makhmadyorova on 20/07/23.
 //
 
 import SwiftUI

@@ -2,7 +2,7 @@
 //  LoadingView.swift
 //  DubDubGrub
 //
-//  Created by IMacIBT1 on 25/07/23.
+//  Created by Farangis Makhmadyorova on 25/07/23.
 //
 
 import SwiftUI

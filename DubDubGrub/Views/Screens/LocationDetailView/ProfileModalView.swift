@@ -2,7 +2,7 @@
 //  ProfileModalView.swift
 //  DubDubGrub
 //
-//  Created by IMacIBT1 on 26/07/23.
+//  Created by Farangis Makhmadyorova on 26/07/23.
 //
 
 import SwiftUI
@@ -21,35 +21,44 @@ struct ProfileModalView: View {
                     .font(.title2)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
+                    .padding(.horizontal)
 
                 Text(profile.companyName)
                     .fontWeight(.semibold)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
                     .foregroundColor(.secondary)
+                    .accessibilityLabel(Text("Works at \(profile.companyName)"))
+                    .padding(.horizontal)
 
                 Text(profile.bio)
                     .lineLimit(3)
                     .padding()
+                    .accessibilityLabel(Text("Bio, \(profile.bio)"))
                 
             }
             .frame(width: 300, height: 230)
             .background(Color(.secondarySystemBackground))
             .cornerRadius(16)
-            .overlay(Button {
-                withAnimation { isShowingProfileModal = false }
+            .overlay(alignment: .topTrailing) {
+                Button {
+                    withAnimation { isShowingProfileModal = false }
                 } label: {
                     XDismissButton()
-                }, alignment: .topTrailing)
+                }
+            }
             
-            Image(uiImage: profile.createAvatarImage())
+            Image(uiImage: profile.avatarImage)
                 .resizable()
                 .scaledToFill()
                 .frame(width: 110, height: 110)
                 .clipShape(Circle())
                 .shadow(radius: 4, x: 0, y: 6)
                 .offset(y: -120)
+                .accessibilityHidden(true)
         }
+        .transition(.opacity.combined(with: .slide))
+        .zIndex(2)
     }
 }
 

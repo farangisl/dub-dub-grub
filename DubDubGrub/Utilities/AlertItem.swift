@@ -2,7 +2,7 @@
 //  AlertItem.swift
 //  DubDubGrub
 //
-//  Created by IMacIBT1 on 19/07/23.
+//  Created by Farangis Makhmadyorova on 19/07/23.
 //
 
 import SwiftUI
@@ -12,11 +12,15 @@ struct AlertItem: Identifiable {
     let title: Text
     let message: Text
     let dismissButton: Alert.Button
+    
+    var alert: Alert {
+        Alert(title: title, message: message, dismissButton: dismissButton)
+    }
 }
 
 struct AlertContext {
     
-    //MARK: - MapView Errors
+//MARK: - MapView Errors
     
     static let unableToGetLocations = AlertItem(title: Text("Locations Error"),
                                                 message: Text("Unable to retrieve locations at this time. \nPlease try again."),
@@ -33,6 +37,18 @@ struct AlertContext {
     static let locationDisabled = AlertItem(title: Text("Locations Service Disabled"),
                                                 message: Text("Your phone's location services are disabled. To change that go to your phone's Settings > Privacy > Location Services."),
                                                 dismissButton: .default(Text("OK")))
+    
+    static let checkedInCount = AlertItem(title: Text("Server Error"),
+                                                message: Text("Unable to get the number of people checked into each location. Please check your internet connection and try again."),
+                                                dismissButton: .default(Text("OK")))
+    
+//MARK:    - LocationListView Errors
+            
+    static let unableToGetAlICheckedinProfiles = AlertItem(title: Text("Server Error"),
+                                                           message: Text("We are unable to get users checked into all locations at this time.\nPlease try again."),
+                                                           dismissButton: .default(Text("OK")))
+    
+    
 //MARK:    - ProfileView Errors
     
     static let invalidProfile = AlertItem(title: Text("Invalid Profile"),
@@ -68,5 +84,16 @@ struct AlertContext {
     static let invalidPhoheNumber = AlertItem(title: Text("Invalid Phone Number"),
                                                     message: Text("The phone number for the location is invalid. Please look up the phone number yourself."),
                                                     dismissButton: .default(Text("OK")))
-        
+    
+    static let unableToGetCheckInStatus = AlertItem(title: Text("Server Error"),
+                                                        message: Text("Unable to retrieve checked in status of the current user.\nPlease try again."),
+                                                        dismissButton: .default(Text("OK")))
+    
+    static let unableToCheckInOrOut = AlertItem(title: Text("Server Error"),
+                                                    message: Text("We are unable to check in/out at this time.\nPlease try again."),
+                                                    dismissButton: .default(Text("OK")))
+    
+    static let unableToGetCheckedInProfiles = AlertItem(title: Text("Server Error"),
+                                                        message: Text("We are unable to get users checked into this location at this time.\nPlease try again."),
+                                                        dismissButton: .default(Text("OK")))
 }

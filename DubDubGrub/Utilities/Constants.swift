@@ -2,7 +2,7 @@
 //  Constants.swift
 //  DubDubGrub
 //
-//  Created by IMacIBT1 on 18/07/23.
+//  Created by Farangis Makhmadyorova on 18/07/23.
 //
 
 import UIKit
@@ -21,13 +21,12 @@ enum PlaceholderImage {
 enum ImageDimension {
     case square, banner
     
-    static func getPlaceholder(for dimension: ImageDimension) -> UIImage {
-        switch dimension {
+    var placeholder: UIImage {
+        switch self {
         case .square:
             return PlaceholderImage.square
         case .banner:
             return PlaceholderImage.banner
         }
-        
     }
 }

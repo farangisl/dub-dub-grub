@@ -2,81 +2,79 @@
 //  LocationMapViewModel.swift
 //  DubDubGrub
 //
-//  Created by IMacIBT1 on 19/07/23.
+//  Created by Farangis Makhmadyorova on 19/07/23.
 //
 
 import MapKit
+import CloudKit
+import SwiftUI
 
-final class LocationMapViewModel: NSObject, ObservableObject {
+extension LocationMapView {
     
-    @Published var isShowingOnboardView = false
-    @Published var alertItem: AlertItem?
-    @Published var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 38.573840,
-                                                                              longitude: 68.795335),
-                                               span: MKCoordinateSpan(latitudeDelta: 0.01,
-                                                                      longitudeDelta: 0.01))
-    
-    
-    var deviceLocationManager: CLLocationManager?
-    let kHasSeenOnboardView = "hasSeenOnboardView"
-    
-    var hasSeenOnboardView: Bool {
-        return UserDefaults.standard.bool(forKey: kHasSeenOnboardView)
-    }
-    
-    func runStartupChecks() {
-        if !hasSeenOnboardView {
-            isShowingOnboardView = true
-            UserDefaults.standard.set(true, forKey: kHasSeenOnboardView)
-        } else {
-            checkIfLocationServicesIsEnabled()
+    final class LocationMapViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
+        
+        @Published var checkedInProfiles: [CKRecord.ID: Int] = [:]
+        @Published var isShowingDetailView = false
+        @Published var alertItem: AlertItem?
+        @Published var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 38.573840,
+                                                                                  longitude: 68.795335),
+                                                   span: MKCoordinateSpan(latitudeDelta: 0.01,
+                                                                          longitudeDelta: 0.01))
+        
+        let deviceLocationManager = CLLocationManager()
+                
+        override init() {
+            super.init()
+            deviceLocationManager.delegate = self
         }
-    }
-    
-    func checkIfLocationServicesIsEnabled() {
-        if CLLocationManager.locationServicesEnabled() {
-            deviceLocationManager = CLLocationManager()
-            deviceLocationManager!.delegate = self
-        } else {
-            alertItem = AlertContext.locationDisabled
+        
+        func requestAllowOnceLocationPermission() {
+            deviceLocationManager.requestLocation()
         }
-    }
-    
-    private func checkLocationAuthorization() {
-        guard let deviceLocationManager = deviceLocationManager else { return }
-        switch deviceLocationManager.authorizationStatus {
-            
-        case .notDetermined:
-            deviceLocationManager.requestWhenInUseAuthorization()
-        case .restricted:
-            alertItem = AlertContext.locationRestricted
-        case .denied:
-            alertItem = AlertContext.locationDenied
-        case .authorizedAlways, .authorizedWhenInUse:
-            break
-        @unknown default:
-            break
+        
+        func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+            guard let currentLocation = locations.last else { return }
+            withAnimation {
+                region = MKCoordinateRegion(center: currentLocation.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+            }
         }
-    }
-    
-    func getLocations(for locationManager: LocationManager) {
-        CloudKitManager.shared.getLocations { [self] result in
-            DispatchQueue.main.async {
-                switch result {
-                    case .success(let locations):
-                        locationManager.locations = locations
-                    case .failure(_):
-                        alertItem = AlertContext.unableToGetLocations
+        
+        func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+            print("Did Fail With Error")
+        }
+        
+        
+        @MainActor
+        func getLocations(for locationManager: LocationManager) {
+            Task {
+                do {
+                    locationManager.locations = try await CloudKitManager.shared.getLocations()
+                } catch {
+                    alertItem = AlertContext.unableToGetLocations
                 }
             }
         }
-    }
-    
-}
-
-
-extension LocationMapViewModel: CLLocationManagerDelegate {
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        checkLocationAuthorization()
+        
+        
+        @MainActor
+        func getCheckedInCounts() {
+            Task {
+                do {
+                    checkedInProfiles = try await CloudKitManager.shared.getCheckedInProfilesCount()
+                } catch {
+                    alertItem = AlertContext.checkedInCount
+                }
+            }
+        }
+        
+        
+        @MainActor
+        @ViewBuilder func createLocationDetailView(for location: DDGLocation, in dynamicTypeSize: DynamicTypeSize) -> some View {
+            if dynamicTypeSize >= .accessibility3 {
+                LocationDetailView(viewModel: LocationDetailViewModel(location: location)).embedInScrollView()
+            } else {
+                LocationDetailView(viewModel: LocationDetailViewModel(location: location))
+            }
+        }
     }
 }

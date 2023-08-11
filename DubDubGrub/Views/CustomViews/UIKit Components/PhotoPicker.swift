@@ -2,7 +2,7 @@
 //  PhotoPicker.swift
 //  DubDubGrub
 //
-//  Created by IMacIBT1 on 20/07/23.
+//  Created by Farangis Makhmadyorova on 20/07/23.
 //
 
 import SwiftUI
@@ -10,7 +10,6 @@ import SwiftUI
 struct PhotoPicker: UIViewControllerRepresentable {
     
     @Binding var image: UIImage
-    @Environment(\.presentationMode) var presentationMode
     
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
@@ -37,8 +36,7 @@ struct PhotoPicker: UIViewControllerRepresentable {
             if let image = info[.editedImage] as? UIImage {
                 photoPicker.image = image
             }
-            
-            photoPicker.presentationMode.wrappedValue.dismiss()    
+            picker.dismiss(animated: true)
         }
     }
 }

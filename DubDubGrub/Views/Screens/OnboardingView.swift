@@ -2,20 +2,21 @@
 //  OnboardingView.swift
 //  DubDubGrub
 //
-//  Created by IMacIBT1 on 20/07/23.
+//  Created by Farangis Makhmadyorova on 20/07/23.
 //
 
 import SwiftUI
 
 struct OnboardingView: View {
-    @Binding var isShowingOnboardView: Bool
+    
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
         VStack(spacing: 30) {
             HStack {
                 Spacer()
                 Button {
-                    isShowingOnboardView = false
+                    dismiss()
                 } label: {
                     XDismissButton()
                 }
@@ -24,11 +25,9 @@ struct OnboardingView: View {
             
             Spacer()
             
-            Image("ddg-map-logo")
-                .resizable()
-                .scaledToFit()
-                .frame(height: 125)
-                .padding()
+            LogoView(frameWith: 250)
+                .padding(.bottom)
+            
             VStack(alignment: .leading, spacing: 32) {
                 
                 OnboardInfoView(imageName: "building.2.crop.circle",
@@ -51,21 +50,23 @@ struct OnboardingView: View {
 
 struct OnboardingView_Previews: PreviewProvider {
     static var previews: some View {
-        OnboardingView(isShowingOnboardView: .constant(true))
+        OnboardingView()
     }
 }
 
-struct OnboardInfoView: View {
+fileprivate struct OnboardInfoView: View {
     
     var imageName: String
     var title: String
     var description: String
+    
     var body: some View {
         HStack(spacing: 26) {
             Image(systemName: imageName)
                 .resizable()
                 .frame(width: 50, height: 50)
                 .foregroundColor(.brandPrimary)
+            
             VStack(alignment: .leading, spacing: 4) {
                 Text(title).bold()
                 Text(description)

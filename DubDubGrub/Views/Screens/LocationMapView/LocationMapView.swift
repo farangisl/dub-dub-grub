@@ -2,9 +2,10 @@
 //  LocationMapView.swift
 //  DubDubGrub
 //
-//  Created by IMacIBT1 on 12/07/23.
+//  Created by Farangis Makhmadyorova on 12/07/23.
 //
 
+import CoreLocationUI
 import SwiftUI
 import MapKit
 
@@ -12,47 +13,61 @@ struct LocationMapView: View {
     
     @EnvironmentObject private var locationManager: LocationManager
     @StateObject private var viewModel = LocationMapViewModel()
+    @Environment(\.dynamicTypeSize) var dynamicTypeSize
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             Map(coordinateRegion: $viewModel.region, showsUserLocation: true, annotationItems: locationManager.locations) { location in
-                MapMarker(coordinate: location.location.coordinate, tint: .brandPrimary)
+                MapAnnotation(coordinate: location.location.coordinate, anchorPoint: CGPoint(x: 0.5, y: 0.75)) {
+                    DDGAnnotation(location: location, number: viewModel.checkedInProfiles[location.id, default: 0])
+                        .onTapGesture {
+                            locationManager.selectedLocation = location
+                                viewModel.isShowingDetailView = true
+                        }
+                }
             }
             .tint(.grubRed)
             .ignoresSafeArea()
             
-            VStack {
-                LogoView().shadow(radius: 10)
-                Spacer()
-            }
-        }
-        .alert(item: $viewModel.alertItem, content: { alertItem in
-            Alert(title: alertItem.title, message: alertItem.message, dismissButton: alertItem.dismissButton)
-        })
-        .sheet(isPresented: $viewModel.isShowingOnboardView, onDismiss: viewModel.checkIfLocationServicesIsEnabled) {
-            OnboardingView(isShowingOnboardView: $viewModel.isShowingOnboardView)
-        }
-        .onAppear {
-            viewModel.runStartupChecks()
+            LogoView(frameWith: 125).shadow(radius: 10)
             
+        }
+        .overlay(alignment: .bottomLeading) {
+            LocationButton(.currentLocation) {
+                viewModel.requestAllowOnceLocationPermission()
+            }
+            .foregroundColor(.white)
+            .symbolVariant(.fill)
+            .tint(.grubRed)
+            .labelStyle(.iconOnly)
+            .clipShape(Circle())
+            .padding(EdgeInsets(top: 0, leading: 20, bottom: 40, trailing: 0))
+        }
+        .alert(item: $viewModel.alertItem, content: { $0.alert })
+        .sheet(isPresented: $viewModel.isShowingDetailView) {
+            NavigationStack {
+                viewModel.createLocationDetailView(for: locationManager.selectedLocation!, in: dynamicTypeSize)
+                    .toolbar {
+                        Button("Dismiss") {
+                            viewModel.isShowingDetailView = false
+                        }
+                    }
+                    .navigationBarTitleDisplayMode(.inline)
+            }
+            
+        }
+        .task {
             if locationManager.locations.isEmpty {
                 viewModel.getLocations(for: locationManager)
             }
+            
+            viewModel.getCheckedInCounts()
         }
     }
 }
 
 struct LocationMapView_Previews: PreviewProvider {
     static var previews: some View {
-        LocationMapView()
-    }
-}
-
-struct LogoView: View {
-    var body: some View {
-        Image("ddg-map-logo")
-            .resizable()
-            .scaledToFit()
-            .frame(height: 70)
+        LocationMapView().environmentObject(LocationManager())
     }
 }
